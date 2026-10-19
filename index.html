@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SmartManage Businesses</title>
+<style>
+:root{--blue:#0759c7;--dark:#10233f;--bg:#f3f6fb;--white:#fff;--green:#12834b;--red:#d73535}
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,sans-serif;background:var(--bg);color:var(--dark)}
+header{background:linear-gradient(120deg,#0645a5,#0786e8);color:white;padding:20px 15px}
+header h1{margin:0;font-size:23px}
+header p{margin:7px 0 0;font-size:13px}
+nav{display:flex;gap:7px;overflow-x:auto;padding:10px;background:white;position:sticky;top:0;z-index:5;box-shadow:0 2px 6px #0001}
+nav button{border:0;background:#eaf1ff;color:#0645a5;border-radius:8px;padding:10px 13px;white-space:nowrap;font-weight:bold}
+nav button.active{background:var(--blue);color:white}
+main{max-width:1000px;margin:auto;padding:14px}
+.panel{background:white;padding:16px;border-radius:13px;margin-bottom:14px;box-shadow:0 3px 12px #10233f0c}
+h2{font-size:20px;margin:0 0 14px}
+h3{font-size:16px;margin:10px 0}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px}
+.stat{background:#edf4ff;border-radius:10px;padding:15px}
+.stat small{color:#52647b}
+.stat strong{display:block;font-size:22px;margin-top:8px;overflow-wrap:anywhere}
+input,select,textarea{width:100%;padding:12px;margin:5px 0 10px;border:1px solid #d5ddea;border-radius:8px;font-size:15px;background:white}
+label{font-size:13px;font-weight:bold}
+button,.btn{cursor:pointer}
+.primary{border:0;background:var(--blue);color:white;border-radius:8px;padding:12px 15px;font-weight:bold}
+.secondary{border:0;background:#e9eff9;color:#17365f;border-radius:8px;padding:10px}
+.danger{border:0;background:#ffe7e7;color:#b11;padding:8px;border-radius:6px}
+.formgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:8px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{text-align:left;padding:10px 7px;border-bottom:1px solid #e8edf4;overflow-wrap:anywhere}
+th{background:#f2f6fc}
+.tablewrap{overflow-x:auto}
+.hidden{display:none!important}
+.notice{padding:11px;border-radius:8px;background:#fff6d9;margin:10px 0;font-size:13px}
+.success{color:var(--green)}
+footer{text-align:center;color:#718096;padding:25px;font-size:12px}
+#login{max-width:460px;margin:35px auto}
+.badge{display:inline-block;padding:4px 8px;border-radius:20px;background:#e5f8ed;color:#08743b;font-size:12px}
+</style>
+</head>
+<body>
+<header>
+  <h1>SmartManage Businesses</h1>
+  <p>Manage your business from one simple dashboard</p>
+</header>
+
+<section id="login" class="panel">
+  <h2>Welcome 👋</h2>
+  <p>Create a local demo profile to explore the app.</p>
+  <label>Business name</label>
+  <input id="businessName" placeholder="e.g. Allan General Dealer">
+  <label>Business type</label>
+  <select id="businessType">
+    <option>General Shop</option><option>School</option><option>Hardware</option>
+    <option>Restaurant</option><option>Pharmacy</option><option>Fuel Station</option>
+    <option>Clothing Shop</option><option>Salon</option><option>Transport</option>
+    <option>Farm</option><option>Guesthouse</option><option>Electronics</option>
+    <option>Construction</option><option>Other</option>
+  </select>
+  <label>Country code</label>
+  <select id="countryCode"><option value="+265">Malawi (+265)</option><option value="+260">Zambia (+260)</option><option value="+255">Tanzania (+255)</option><option value="+254">Kenya (+254)</option><option value="+27">South Africa (+27)</option></select>
+  <label>Phone number</label>
+  <input id="phone" type="tel" placeholder="Phone number">
+  <label>Create a demo PIN (4–8 digits)</label>
+  <input id="pin" type="password" inputmode="numeric" maxlength="8" placeholder="Demo PIN">
+  <button class="primary" style="width:100%" onclick="login()">Open Dashboard</button>
+  <div class="notice">Demo only: this screen does not send SMS or provide secure authentication. Do not use a PIN you use elsewhere.</div>
+</section>
+
+<div id="app" class="hidden">
+<nav id="nav">
+<button class="active" onclick="showPage('dashboard',this)">Dashboard</button>
+<button onclick="showPage('sales',this)">Sales</button>
+<button onclick="showPage('expenses',this)">Expenses</button>
+<button onclick="showPage('stock',this)">Stock</button>
+<button onclick="showPage('customers',this)">Customers & Debts</button>
+<button onclick="showPage('suppliers',this)">Suppliers</button>
+<button onclick="showPage('workers',this)">Workers</button>
+<button onclick="showPage('payroll',this)">Payroll</button>
+<button onclick="showPage('school',this)">School</button>
+<button onclick="showPage('refunds',this)">Refunds</button>
+<button onclick="showPage('reports',this)">Reports</button>
+<button onclick="showPage('subscription',this)">Subscription</button>
+<button onclick="showPage('settings',this)">Backup & Settings</button>
+</nav>
+
+<main>
+<section id="dashboard" class="page">
+<div class="panel"><h2 id="welcome">Business Dashboard</h2><span id="bizType" class="badge"></span><p id="today"></p></div>
+<div class="grid">
+<div class="stat"><small>Total sales</small><strong id="totalSales">MK 0</strong></div>
+<div class="stat"><small>Total expenses</small><strong id="totalExpenses">MK 0</strong></div>
+<div class="stat"><small>Estimated profit</small><strong id="profit">MK 0</strong></div>
+<div class="stat"><small>Stock items</small><strong id="stockCount">0</strong></div>
+<div class="stat"><small>Customer debts</small><strong id="debtTotal">MK 0</strong></div>
+<div class="stat"><small>Workers</small><strong id="workerCount">0</strong></div>
+</div>
+<div class="panel" style="margin-top:14px"><h3>Recent activity</h3><div id="activity">No activity yet.</div></div>
+</section>
+
+<section id="sales" class="page hidden">
+<div class="panel"><h2>Record a Sale</h2>
+<form id="saleForm" class="formgrid">
+<div><label>Item or service</label><input name="item" required></div>
+<div><label>Quantity</label><input name="qty" type="number" min="1" value="1" required></div>
+<div><label>Total amount (MK)</label><input name="amount" type="number" min="0" required></div>
+<div><label>Payment method</label><select name="method"><option>Cash</option><option>Airtel Money</option><option>TNM Mpamba</option><option>Bank Transfer</option><option>Credit / Unpaid</option><option>Other</option></select></div>
+<div><label>Transaction reference (optional)</label><input name="reference"></div>
+<div><label>Customer (optional)</label><input name="customer"></div>
+</div><button class="primary">Save Sale</button></form></div>
+<div class="panel"><h3>Sales History</h3><div class="tablewrap" id="salesTable"></div></div>
+</section>
+
+<section id="expenses" class="page hidden">
+<div class="panel"><h2>Record Expense</h2><form id="expenseForm" class="formgrid">
+<div><label>Expense description</label><input name="description" required></div>
+<div><label>Amount (MK)</label><input name="amount" type="number" min="0" required></div>
+<div><label>Payment method</label><select name="method"><option>Cash</option><option>Airtel Money</option><option>TNM Mpamba</option><option>Bank Transfer</option><option>Other</option></select></div>
+</div><button class="primary">Save Expense</button></form></div>
+<div class="panel"><h3>Expense History</h3><div class="tablewrap" id="expensesTable"></div></div>
+</section>
+
+<section id="stock" class="page hidden">
+<div class="panel"><h2>Inventory / Stock</h2><form id="stockForm" class="formgrid">
+<div><label>Product name</label><input name="name" required></div>
+<div><label>Quantity in stock</label><input name="qty" type="number" min="0" required></div>
+<div><label>Buying price per item (MK)</label><input name="buy" type="number" min="0" value="0"></div>
+<div><label>Selling price per item (MK)</label><input name="sell" type="number" min="0" value="0"></div>
+<div><label>Supplier</label><input name="supplier"></div>
+</div><button class="primary">Add / Update Stock</button></form></div>
+<div class="panel"><h3>Stock List</h3><div class="tablewrap" id="stockTable"></div></div>
+</section>
+
+<section id="customers" class="page hidden">
+<div class="panel"><h2>Customers & Debts</h2><form id="customerForm" class="formgrid">
+<div><label>Customer name</label><input name="name" required></div>
+<div><label>Phone number</label><input name="phone" placeholder="+265..."></div>
+<div><label>Amount owed (MK)</label><input name="debt" type="number" min="0" value="0"></div>
+<div><label>Amount paid now (MK)</label><input name="paid" type="number" min="0" value="0"></div>
+</div><button class="primary">Save Customer</button></form></div>
+<div class="panel"><h3>Customer List</h3><div class="tablewrap" id="customersTable"></div></div>
+</section>
+
+<section id="suppliers" class="page hidden">
+<div class="panel"><h2>Suppliers</h2><form id="supplierForm" class="formgrid">
+<div><label>Supplier name</label><input name="name" required></div>
+<div><label>Phone number</label><input name="phone" placeholder="+265..."></div>
+<div><label>Products supplied</label><input name="products"></div>
+<div><label>Balance owed (MK)</label><input name="balance" type="number" min="0" value="0"></div>
+</div><button class="primary">Save Supplier</button></form></div>
+<div class="panel"><div class="tablewrap" id="suppliersTable"></div></div>
+</section>
+
+<section id="workers" class="page hidden">
+<div class="panel"><h2>Workers / Staff</h2><form id="workerForm" class="formgrid">
+<div><label>Full name</label><input name="name" required></div>
+<div><label>Phone with country code</label><input name="phone" placeholder="+265..." required></div>
+<div><label>Role / job title</label><input name="role" placeholder="e.g. Cashier" required></div>
+<div><label>Pay amount (MK)</label><input name="pay" type="number" min="0" required></div>
+<div><label>Pay frequency</label><select name="frequency"><option>Daily</option><option>Weekly</option><option>Monthly</option><option>Per job</option></select></div>
+<div><label>Preferred payment method</label><select name="method"><option>Cash</option><option>Airtel Money</option><option>TNM Mpamba</option><option>Bank Transfer</option><option>Other</option></select></div>
+<div><label>Payment number / account (optional)</label><input name="account"></div>
+</div><button class="primary">Add Worker</button></form></div>
+<div class="panel"><h3>Worker List</h3><div class="tablewrap" id="workersTable"></div></div>
+</section>
+
+<section id="payroll" class="page hidden">
+<div class="panel"><h2>Worker Payroll</h2><form id="payrollForm" class="formgrid">
+<div><label>Select worker</label><select name="worker" id="payWorker" required></select></div>
+<div><label>Amount paid / due (MK)</label><input name="amount" type="number" min="0" required></div>
+<div><label>Payment method</label><select name="method"><option>Cash</option><option>Airtel Money</option><option>TNM Mpamba</option><option>Bank Transfer</option><option>Other</option></select></div>
+<div><label>Transaction reference</label><input name="reference"></div>
+<div><label>Pay period</label><input name="period" placeholder="e.g. October 2026" required></div>
+<div><label>Status</label><select name="status"><option>Pending</option><option>Paid</option></select></div>
+</div><button class="primary">Save Payroll Record</button></form>
+<div class="notice">This records payroll only. It does not transfer money to workers.</div></div>
+<div class="panel"><h3>Payroll History</h3><div class="tablewrap" id="payrollTable"></div></div>
+</section>
+
+<section id="school" class="page hidden">
+<div class="panel"><h2>School Records</h2><form id="schoolForm" class="formgrid">
+<div><label>Student name</label><input name="name" required></div>
+<div><label>Class / form</label><input name="className" required></div>
+<div><label>Fees required (MK)</label><input name="fees" type="number" min="0" value="0"></div>
+<div><label>Fees paid (MK)</label><input name="paid" type="number" min="0" value="0"></div>
+<div><label>Attendance</label><select name="attendance"><option>Present</option><option>Absent</option><option>Late</option></select></div>
+<div><label>Exam marks (%)</label><input name="marks" type="number" min="0" max="100" value="0"></div>
+</div><button class="primary">Save Student Record</button></form></div>
+<div class="panel"><h3>Student List</h3><div class="tablewrap" id="schoolTable"></div></div>
+</section>
+
+<section id="refunds" class="page hidden">
+<div class="panel"><h2>Refunds / Reversals</h2><form id="refundForm" class="formgrid">
+<div><label>Sale or item reference</label><input name="reference" required></div>
+<div><label>Reason</label><input name="reason" required></div>
+<div><label>Refund amount (MK)</label><input name="amount" type="number" min="0" required></div>
+<div><label>Method</label><select name="method"><option>Cash</option><option>Airtel Money</option><option>TNM Mpamba</option><option>Bank Transfer</option><option>Other</option></select></div>
+</div><button class="primary">Record Refund</button></form></div>
+<div class="panel"><div class="tablewrap" id="refundsTable"></div></div>
+</section>
+
+<section id="reports" class="page hidden">
+<div class="panel"><h2>Business Reports</h2><label>Filter by date range</label>
+<div class="formgrid"><div><label>From</label><input type="date" id="fromDate"></div><div><label>To</label><input type="date" id="toDate"></div></div>
+<button class="primary" onclick="renderReports()">Generate Report</button>
+<button class="secondary" onclick="exportCSV()">Export CSV</button>
+<button class="secondary" onclick="window.print()">Print Report</button>
+<div id="reportResult" style="margin-top:15px"></div></div>
+</section>
+
+<section id="subscription" class="page hidden">
+<div class="panel"><h2>Subscription</h2>
+<div class="stat"><small>Demo plan</small><strong>MK 5,000 / 90 days</strong><p>New users: 24-hour trial concept</p></div>
+<h3>Manual payment request</h3>
+<p>TNM Mpamba: <strong>+265890840266</strong><br>Name: <strong>Tivwale Ng'oma</strong></p>
+<div class="notice">Before sending money, confirm the payment details with the service owner. Never share your PIN. This demo cannot verify payments automatically.</div>
+<form id="paymentForm">
+<label>Payment transaction reference</label><input name="reference" required>
+<label>Payment date</label><input name="date" type="date" required>
+<label>Plan</label><select name="plan"><option>MK 5,000 / 90 days</option></select>
+<button class="primary">Save Payment Request</button>
+</form>
+<div class="tablewrap" id="paymentsTable"></div>
+</div>
+</section>
+
+<section id="settings" class="page hidden">
+<div class="panel"><h2>Backup & Settings</h2>
+<p>Download a JSON backup of the data stored in this browser.</p>
+<button class="primary" onclick="backup()">Download Backup</button>
+<h3>Restore backup</h3><input id="restoreFile" type="file" accept=".json,application/json">
+<button class="secondary" onclick="restore()">Restore Selected Backup</button>
+<h3>Business profile</h3><p id="profileDetails"></p>
+<button class="danger" onclick="clearData()">Delete all demo data</button>
+<div class="notice">Data is stored only in this browser on this device. Clearing browser storage can erase it. This demo is not a secure cloud service.</div>
+</div>
+</section>
+</main>
+</div>
+<footer>SmartManage Businesses · Demo version</footer>
+
+<script>
+const KEY="smartmanage_demo_v1";
+let db={profile:null,sales:[],expenses:[],stock:[],customers:[],suppliers:[],workers:[],payroll:[],school:[],refunds:[],payments:[],activity:[]};
+function load(){try{let d=JSON.parse(localStorage.getItem(KEY));if(d)db={...db,...d}}catch(e){}}
+function save(){localStorage.setItem(KEY,JSON.stringify(db));renderAll()}
+function money(n){return "MK "+Number(n||0).toLocaleString("en-US",{maximumFractionDigits:2})}
+function esc(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function log(msg){db.activity.unshift({msg,date:new Date().toLocaleString()});db.activity=db.activity.slice(0,30)}
+function login(){
+let name=document.getElementById("businessName").value.trim(),phone=document.getElementById("phone").value.trim(),pin=document.getElementById("pin").value;
+if(!name||!phone||!/^\d{4,8}$/.test(pin)){alert("Enter business name, phone number and a 4–8 digit demo PIN.");return}
+db.profile={name,type:document.getElementById("businessType").value,phone:document.getElementById("countryCode").value+phone};
+log("Demo profile opened");save();
+document.getElementById("login").classList.add("hidden");document.getElementById("app").classList.remove("hidden");
+document.getElementById("today").textContent=new Date().toLocaleDateString();
+}
+function showPage(id,btn){document.querySelectorAll(".page").forEach(p=>p.classList.add("hidden"));document.getElementById(id).classList.remove("hidden");document.querySelectorAll("nav button").forEach(b=>b.classList.remove("active"));if(btn)btn.classList.add("active");renderAll()}
+function table(id,headers,rows){let el=document.getElementById(id);if(!el)return;el.innerHTML=rows.length?'<table><thead><tr>'+headers.map(x=>'<th>'+esc(x)+'</th>').join('')+'</tr></thead><tbody>'+rows.map(r=>'<tr>'+r.map(v=>'<td>'+esc(v)+'</td>').join('')+'</tr>').join('')+'</tbody></table>':'<p>No records yet.</p>'}
+function deleteButton(type,id){return '<button class="danger" onclick="removeRecord(\''+type+'\','+id+')">Delete</button>'}
+function removeRecord(type,id){if(!confirm("Delete this record?"))return;db[type].splice(id,1);log("Deleted "+type+" record");save()}
+function formData(form){return Object.fromEntries(new FormData(form).entries())}
+function attach(id,type,callback){document.getElementById(id).addEventListener("submit",e=>{e.preventDefault();let x=formData(e.target);callback(x);e.target.reset();save()})}
+attach("saleForm","sales",x=>{x.amount=+x.amount;x.qty=+x.qty;x.date=new Date().toISOString().slice(0,10);db.sales.unshift(x);if(x.method==="Credit / Unpaid"&&x.customer){let c=db.customers.find(c=>c.name.toLowerCase()===x.customer.toLowerCase());if(c)c.debt=+c.debt+x.amount}log("Sale recorded: "+x.item)});
+attach("expenseForm","expenses",x=>{x.amount=+x.amount;x.date=new Date().toISOString().slice(0,10);db.expenses.unshift(x);log("Expense recorded")});
+attach("stockForm","stock",x=>{let old=db.stock.find(s=>s.name.toLowerCase()===x.name.toLowerCase());if(old){old.qty=+old.qty + +x.qty;old.buy=+x.buy;old.sell=+x.sell;old.supplier=x.supplier}else db.stock.push({...x,qty:+x.qty,buy:+x.buy,sell:+x.sell});log("Stock updated: "+x.name)});
+attach("customerForm","customers",x=>{x.debt=Math.max(0,+x.debt-(+x.paid||0));x.paid=+x.paid;db.customers.push(x);log("Customer saved: "+x.name)});
+attach("supplierForm","suppliers",x=>{x.balance=+x.balance;db.suppliers.push(x);log("Supplier saved: "+x.name)});
+attach("workerForm","workers",x=>{x.pay=+x.pay;db.workers.push(x);log("Worker added: "+x.name)});
+attach("payrollForm","payroll",x=>{x.amount=+x.amount;x.date=new Date().toISOString().slice(0,10);db.payroll.unshift(x);if(x.status==="Paid"){db.expenses.unshift({description:"Worker payroll: "+x.worker+" ("+x.period+")",amount:x.amount,method:x.method,date:x.date})}log("Payroll recorded for "+x.worker)});
+attach("schoolForm","school",x=>{x.fees=+x.fees;x.paid=+x.paid;x.marks=+x.marks;db.school.push(x);log("Student saved: "+x.name)});
+attach("refundForm","refunds",x=>{x.amount=+x.amount;x.date=new Date().toISOString().slice(0,10);db.refunds.unshift(x);log("Refund recorded")});
+attach("paymentForm","payments",x=>{x.status="Pending review";db.payments.unshift(x);log("Subscription payment request saved")});
+function renderAll(){
+if(!db.profile)return;
+document.getElementById("welcome").textContent=db.profile.name+" Dashboard";
+document.getElementById("bizType").textContent=db.profile.type;
+document.getElementById("totalSales").textContent=money(db.sales.reduce((a,x)=>a+x.amount,0));
+document.getElementById("totalExpenses").textContent=money(db.expenses.reduce((a,x)=>a+x.amount,0)+db.refunds.reduce((a,x)=>a+x.amount,0));
+document.getElementById("profit").textContent=money(db.sales.reduce((a,x)=>a+x.amount,0)-db.expenses.reduce((a,x)=>a+x.amount,0)-db.refunds.reduce((a,x)=>a+x.amount,0));
+document.getElementById("stockCount").textContent=db.stock.reduce((a,x)=>a+(+x.qty||0),0);
+document.getElementById("debtTotal").textContent=money(db.customers.reduce((a,x)=>a+(+x.debt||0),0));
+document.getElementById("workerCount").textContent=db.workers.length;
+document.getElementById("activity").innerHTML=db.activity.length?db.activity.slice(0,10).map(x=>"<p>"+esc(x.date)+" — "+esc(x.msg)+"</p>").join(""):"No activity yet.";
+table("salesTable",["Date","Item","Qty","Amount","Method","Reference",""],db.sales.map((x,i)=>[x.date,x.item,x.qty,money(x.amount),x.method,x.reference,deleteButton("sales",i)]));
+table("expensesTable",["Date","Description","Amount","Method",""],db.expenses.map((x,i)=>[x.date,x.description,money(x.amount),x.method,deleteButton("expenses",i)]));
+table("stockTable",["Product","Qty","Buying price","Selling price","Supplier",""],db.stock.map((x,i)=>[x.name,x.qty,money(x.buy),money(x.sell),x.supplier,deleteButton("stock",i)]));
+table("customersTable",["Name","Phone","Debt",""],db.customers.map((x,i)=>[x.name,x.phone,money(x.debt),deleteButton("customers",i)]));
+table("suppliersTable",["Name","Phone","Products","Balance",""],db.suppliers.map((x,i)=>[x.name,x.phone,x.products,money(x.balance),deleteButton("suppliers",i)]));
+table("workersTable",["Name","Phone","Role","Pay","Frequency","Method","Account",""],db.workers.map((x,i)=>[x.name,x.phone,x.role,money(x.pay),x.frequency,x.method,x.account,deleteButton("workers",i)]));
+document.getElementById("payWorker").innerHTML='<option value="">Select worker</option>'+db.workers.map(x=>'<option>'+esc(x.name)+'</option>').join("");
+table("payrollTable",["Worker","Amount","Method","Reference","Period","Status","Date",""],db.payroll.map((x,i)=>[x.worker,money(x.amount),x.method,x.reference,x.period,x.status,x.date,deleteButton("payroll",i)]));
+table("schoolTable",["Student","Class","Fees","Paid","Attendance","Marks",""],db.school.map((x,i)=>[x.name,x.className,money(x.fees),money(x.paid),x.attendance,x.marks+"%",deleteButton("school",i)]));
+table("refundsTable",["Date","Reference","Reason","Amount","Method",""],db.refunds.map((x,i)=>[x.date,x.reference,x.reason,money(x.amount),x.method,deleteButton("refunds",i)]));
+table("paymentsTable",["Reference","Date","Plan","Status"],db.payments.map(x=>[x.reference,x.date,x.plan,x.status]));
+document.getElementById("profileDetails").textContent="Business: "+db.profile.name+" | Type: "+db.profile.type+" | Phone: "+db.profile.phone;
+renderReports();
+}
+function renderReports(){
+let from=document.getElementById("fromDate").value,to=document.getElementById("toDate").value;
+let filter=arr=>arr.filter(x=>(!from||x.date>=from)&&(!to||x.date<=to));
+let s=filter(db.sales),e=filter(db.expenses),r=filter(db.refunds);
+let sales=s.reduce((a,x)=>a+x.amount,0),expenses=e.reduce((a,x)=>a+x.amount,0),refunds=r.reduce((a,x)=>a+x.amount,0);
+document.getElementById("reportResult").innerHTML="<p>Sales: <b>"+money(sales)+"</b></p><p>Expenses: <b>"+money(expenses)+"</b></p><p>Refunds: <b>"+money(refunds)+"</b></p><p>Estimated balance: <b>"+money(sales-expenses-refunds)+"</b></p><p>Sales records: "+s.length+" | Expense records: "+e.length+"</p>";
+}
+function exportCSV(){
+let rows=[["Type","Date","Description","Amount","Method","Reference"]];
+db.sales.forEach(x=>rows.push(["Sale",x.date,x.item,x.amount,x.method,x.reference]));
+db.expenses.forEach(x=>rows.push(["Expense",x.date,x.description,x.amount,x.method,""]));
+db.refunds.forEach(x=>rows.push(["Refund",x.date,x.reason,x.amount,x.method,x.reference]));
+let csv=rows.map(r=>r.map(v=>'"'+String(v??"").replace(/"/g,'""')+'"').join(",")).join("\r\n");
+downloadFile("smartmanage-report.csv",csv,"text/csv");
+}
+function downloadFile(name,data,type){let a=document.createElement("a");a.href=URL.createObjectURL(new Blob([data],{type}));a.download=name;a.click();URL.revokeObjectURL(a.href)}
+function backup(){downloadFile("smartmanage-backup.json",JSON.stringify(db,null,2),"application/json")}
+function restore(){
+let f=document.getElementById("restoreFile").files[0];if(!f){alert("Choose a JSON backup first.");return}
+let r=new FileReader();r.onload=()=>{try{let d=JSON.parse(r.result);if(!d.profile)throw Error();if(confirm("Replace current demo data with this backup?")){db={...db,...d};save();alert("Backup restored.")}}catch(e){alert("That backup file is invalid.")}};r.readAsText(f)
+}
+function clearData(){if(confirm("Delete all SmartManage demo data from this browser?")){localStorage.removeItem(KEY);location.reload()}}
+load();
+if(db.profile){document.getElementById("login").classList.add("hidden");document.getElementById("app").classList.remove("hidden");renderAll();document.getElementById("today").textContent=new Date().toLocaleDateString()}
+</script>
+</body>
+</html>
