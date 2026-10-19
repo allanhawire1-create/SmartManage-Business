@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0759c7">
+<title>SmartManage Businesses Malawi</title>
+<style>
+:root{--blue:#0759c7;--navy:#10233f;--bg:#f2f5fa;--green:#13834b;--red:#d73535}
+*{box-sizing:border-box}
+body{margin:0;font:15px Arial,sans-serif;background:var(--bg);color:var(--navy)}
+header{background:linear-gradient(120deg,#073b91,#0787e8);color:white;padding:20px 16px}
+header h1{margin:0;font-size:24px}
+header p{margin:8px 0 0}
+nav{display:flex;gap:7px;overflow-x:auto;position:sticky;top:0;background:white;padding:10px;z-index:10;box-shadow:0 2px 8px #0001}
+nav button{border:0;padding:11px 13px;background:#eaf1ff;color:#0759c7;border-radius:8px;white-space:nowrap;font-weight:bold}
+nav button.active{background:var(--blue);color:white}
+main{max-width:1150px;margin:auto;padding:14px}
+.card{background:white;border-radius:12px;padding:16px;margin-bottom:14px;box-shadow:0 3px 12px #10233f0b}
+h2{font-size:20px;margin:0 0 14px}
+h3{font-size:16px;margin:12px 0}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px}
+.stat{padding:15px;background:#edf4ff;border-radius:10px;overflow-wrap:anywhere}
+.stat small{color:#5c6b80}
+.stat strong{display:block;font-size:22px;margin-top:8px}
+.formgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px}
+label{display:block;font-weight:bold;font-size:13px;margin-top:4px}
+input,select,textarea{width:100%;padding:11px;margin:5px 0 10px;border:1px solid #d5ddea;border-radius:8px;font-size:15px;background:white}
+button{cursor:pointer}
+.primary{border:0;border-radius:8px;background:var(--blue);color:white;padding:12px 15px;font-weight:bold}
+.secondary{border:0;border-radius:8px;background:#e8eef9;color:#17365f;padding:10px}
+.danger{border:0;border-radius:6px;background:#ffe8e8;color:#a00;padding:7px}
+.tablewrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13px}
+td,th{text-align:left;padding:10px 8px;border-bottom:1px solid #e5eaf2;overflow-wrap:anywhere}
+th{background:#f1f5fb}
+.hidden{display:none!important}
+.notice{padding:12px;border-radius:8px;background:#fff5d5;margin:12px 0;font-size:13px}
+.badge{display:inline-block;padding:5px 9px;border-radius:20px;background:#e4f8ec;color:#08743b}
+footer{text-align:center;color:#778397;padding:25px;font-size:12px}
+@media print{header,nav,button,.no-print,footer{display:none!important}body{background:white}.card{box-shadow:none}}
+</style>
+</head>
+<body>
+<header>
+<h1>SmartManage Businesses</h1>
+<p>All-in-one business management for Malawi 🇲🇼</p>
+</header>
+
+<section id="setup" class="card" style="max-width:550px;margin:25px auto">
+<h2>Set Up Your Business</h2>
+<label>Business name</label><input id="setupName" placeholder="Enter business name">
+<label>Business type</label>
+<select id="setupType">
+<option>General Shop</option><option>School</option><option>Clothing Shop</option>
+<option>Hardware</option><option>Restaurant</option><option>Pharmacy</option>
+<option>Fuel Station</option><option>Salon</option><option>Transport</option>
+<option>Farm</option><option>Guesthouse</option><option>Electronics</option>
+<option>Construction</option><option>Rental Business</option><option>Other</option>
+</select>
+<label>Country code</label>
+<select id="setupCode"><option value="+265">Malawi +265</option><option value="+260">Zambia +260</option><option value="+255">Tanzania +255</option><option value="+27">South Africa +27</option></select>
+<label>Phone number</label><input id="setupPhone" type="tel" placeholder="Phone number">
+<label>Demo PIN (4–8 digits)</label><input id="setupPin" type="password" maxlength="8" inputmode="numeric">
+<button class="primary" onclick="startApp()">Open SmartManage</button>
+<div class="notice">This is a local demo, not a secure login system. It does not send SMS or verify phone ownership. Do not enter a PIN you use for banking or mobile money.</div>
+</section>
+
+<div id="application" class="hidden">
+<nav id="nav">
+<button class="active" onclick="page('dashboard',this)">Dashboard</button>
+<button onclick="page('sales',this)">Sales</button>
+<button onclick="page('expenses',this)">Expenses</button>
+<button onclick="page('stock',this)">Inventory</button>
+<button onclick="page('customers',this)">Customers & Debts</button>
+<button onclick="page('suppliers',this)">Suppliers</button>
+<button onclick="page('workers',this)">Workers</button>
+<button onclick="page('payroll',this)">Payroll</button>
+<button onclick="page('school',this)">School</button>
+<button onclick="page('refunds',this)">Refunds</button>
+<button onclick="page('invoices',this)">Invoices</button>
+<button onclick="page('reports',this)">Reports</button>
+<button onclick="page('subscription',this)">Subscription</button>
+<button onclick="page('admin',this)">Owner Dashboard</button>
+<button onclick="page('settings',this)">Backup & Settings</button>
+</nav>
+
+<main>
+<section id="dashboard" class="page">
+<div class="card"><h2 id="welcome"></h2><span class="badge" id="businessBadge"></span><p id="dateNow"></p></div>
+<div class="grid">
+<div class="stat"><small>Total sales</small><strong id="dashSales">MK 0</strong></div>
+<div class="stat"><small>Expenses</small><strong id="dashExpenses">MK 0</strong></div>
+<div class="stat"><small>Estimated balance</small><strong id="dashProfit">MK 0</strong></div>
+<div class="stat"><small>Units in stock</small><strong id="dashStock">0</strong></div>
+<div class="stat"><small>Customer debts</small><strong id="dashDebt">MK 0</strong></div>
+<div class="stat"><small>Workers</small><strong id="dashWorkers">0</strong></div>
+<div class="stat"><small>Students</small><strong id="dashStudents">0</strong></div>
+<div class="stat"><small>Pending payroll</small><strong id="dashPayroll">MK 0</strong></div>
+</div>
+<div class="card"><h3>Recent activity</h3><div id="activityList">No activity yet.</div></div>
+</section>
+
+<section id="sales" class="page hidden">
+<div class="card"><h2>Sales & Payments</h2>
+<form id="salesForm" class="formgrid">
+<div><label>Item or service</label><input name="item" required></div>
+<div><label>Quantity</label><input name="qty" type="number" min="1" value="1" required></div>
+<div><label>Total amount (MK)</label><input name="amount" type="number" min="0" required></div>
+<div><label>Payment method</label><select name="method"><option>Cash</option><option>Airtel Money</option><option>TNM Mpamba</option><option>Bank Transfer</option><option>Credit / Unpaid</option><option>Other</option></select></div>
+<div><label>Transaction reference</label><input name="reference"></div>
+<div><label>Customer name</label><input name="customer"></div>
+<div><label>Date</label><input name="date" type="date" class="dateField"></div>
+</div><button class="primary">Save Sale</button></form></div>
+<div class="card"><h3>Sales history</h3><div id="salesTable" class="tablewrap"></div></div>
+</section>
+
+<section id="expenses" class="page hidden">
+<div class="card"><h2>Business Expenses</h2>
+<form id="expensesForm" class="formgrid">
+<div><label>Description</label><input name="description" required></div>
+<div><label>Category</label><select name="category"><option>Stock purchases</option><option>Transport</option><option>Rent</option><option>Electricity</option><option>Internet</option><option>Wages</option><option>Repairs</option><option>Other</option></select></div>
+<div><label>Amount (MK)</label><input name="amount" type="number" min="0" required></div>
+<div><label>Payment method</label><select name="method"><option>Cash</option><option>Airtel Money</option><option>TNM Mpamba</option><option>Bank Transfer</option><option>Other</option></select></div>
+<div><label>Date</label><input name="date" type="date" class="dateField"></div>
+</div><button class="primary">Save Expense</button></form></div>
+<div class="card"><div id="expensesTable" class="tablewrap"></div></div>
+</section>
+
+<section id="stock" class="page hidden">
+<div class="card"><h2>Inventory & Purchasing</h2>
+<form id="stockForm" class="formgrid">
+<div><label>Product</label><input name="name" required></div>
+<div><label>Quantity received</label><input name="qty" type="number" min="0" required></div>
+<div><label>Buying price per unit (MK)</label><input name="buy" type="number" min="0" value="0"></div>
+<div><label>Selling price per unit (MK)</label><input name="sell" type="number" min="0" value="0"></div>
+<div><label>Supplier</label><input name="supplier"></div>
+</div><button class="primary">Add / Update Stock</button></form></div>
+<div class="card"><div id="stockTable" class="tablewrap"></div></div>
+</section>
+
+<section id="customers" class="page hidden">
+<div class="card"><h2>Customers & Debts</h2>
+<form id="customersForm" class="formgrid">
+<div><label>Customer name</label><input name="name" required></div>
+<div><label>Phone (+265...)</label><input name="phone"></div>
+<div><label>New amount owed (MK)</label><input name="debt" type="number" min="0" value="0"></div>
+<div><label>Payment received (MK)</label><input name="paid" type="number" min="0" value="0"></div>
+</div><button class="primary">Save Customer / Payment</button></form></div>
+<div class="card"><div id="customersTable" class="tablewrap"></div></div>
+</section>
+
+<section id="suppliers" class="page hidden">
+<div class="card"><h2>Suppliers</h2>
+<form id="suppliersForm" class="formgrid">
+<div><label>Supplier name</label><input name="name" required></div>
+<div><label>Phone number</label><input name="phone"></div>
+<div><label>Products supplied</label><input name="products"></div>
+<div><label>Balance owed (MK)</label><input name="balance" type="number" min="0" value="0"></div>
+</div><button class="primary">Save Supplier</button></form></div>
+<div class="card"><div id="suppliersTable" class="tablewrap"></div></div>
+</section>
+
+<section id="workers" class="page hidden">
+<div class="card"><h2>Workers & Staff</h2>
+<form id="workersForm" class="formgrid">
+<div><label>Full name</label><input name="name" required></div>
+<div><label>Phone with country code</label><input name="phone" placeholder="+265..." required></div>
+<div><label>Role / job title</label><input name="role" required></div>
+<div><label>Pay amount (MK)</label><input name="pay" type="number" min="0" required></div>
+<div><label>Pay frequency</label><select name="frequency"><option>Daily</option><option>Weekly</option><option>Monthly</option><option>Per job</option></select></div>
+<div><label>Preferred payment method</label><select name="method"><option>Cash</option><option>Airtel Money</option><option>TNM Mpamba</option><option>Bank Transfer</option><option>Other</option></select></div>
+<div><label>Payment number / account</label><input name="account"></div>
+</div><button class="primary">Add Worker</button></form></div>
+<div class="card"><div id="workersTable" class="tablewrap"></div></div>
+</section>
+
+<section id="payroll" class="page hidden">
+<div class="card"><h2>Payroll & Worker Payments</h2>
+<form id="payrollForm" class="formgrid">
+<div><label>Worker</label><select name="worker" id="workerSelect" required></select></div>
+<div><label>Amount (MK)</label><input name="amount" type="number" min="0" required></div>
+<div><label>Payment method</label><select name="method"><option>Cash</option><option>Airtel Money</option><option>TNM Mpamba</option><option>Bank Transfer</option><option>Other</option></select></div>
+<div><label>Transaction reference</label><input name="reference"></div>
+<div><label>Period</label><input name="period" placeholder="e.g. October 2026" required></div>
+<div><label>Status</label><select name="status"><option>Pending</option><option>Paid</option></select></div>
+<div><label>Payment date</label><input name="date" type="date" class="dateField"></div>
+</div><button class="primary">Save Payroll</button></form>
+<div class="notice">Payroll records do not transfer money. Confirm actual payments through your payment provider.</div></div>
+<div class="card"><div id="payrollTable" class="tablewrap"></div></div>
+</section>
+
+<section id="school" class="page hidden">
+<div class="card"><h2>School Management</h2>
+<form id="schoolForm" class="formgrid">
+<div><label>Student full name</label><input name="name" required></div>
+<div><label>Class / Form</label><input name="className" required></div>
+<div><label>Parent / guardian</label><input name="guardian"></div>
+<div><label>Parent phone</label><input name="phone"></div>
+<div><label>Fees required (MK)</label><input name="fees" type="number" min="0" value="0"></div>
+<div><label>Fees paid (MK)</label><input name="paid" type="number" min="0" value="0"></div>
+<div><label>Attendance</label><select name="attendance"><option>Present</option><option>Absent</option><option>Late</option></select></div>
+<div><label>Exam marks (%)</label><input name="marks" type="number" min="0" max="100" value="0"></div>
+</div><button class="primary">Save Student Record</button></form></div>
+<div class="card"><div id="schoolTable" class="tablewrap"></div></div>
+</section>
+
+<section id="refunds" class="page hidden">
+<div class="card"><h2>Refunds & Reversals</h2>
+<form id="refundsForm" class="formgrid">
+<div><label>Sale / transaction reference</label><input name="reference" required></div>
+<div><label>Reason</label><input name="reason" required></div>
+<div><label>Amount (MK)</label><input name="amount" type="number" min="0" required></div>
+<div><label>Method</label><select name="method"><option>Cash</option><option>Airtel Money</option><option>TNM Mpamba</option><option>Bank Transfer</option><option>Other</option></select></div>
+<div><label>Date</label><input name="date" type="date" class="dateField"></div>
+</div><button class="primary">Record Refund</button></form></div>
+<div class="card"><div id="refundsTable" class="tablewrap"></div></div>
+</section>
+
+<section id="invoices" class="page hidden">
+<div class="card"><h2>Invoices & Receipts</h2>
+<label>Select a sale</label><select id="invoiceSale"></select>
+<button class="primary" onclick="printInvoice()">Print / Save Receipt</button>
+<div class="notice">Select a sale and use your browser's print option to print or save it as PDF.</div>
+<div id="invoicePreview"></div></div>
+</section>
+
+<section id="reports" class="page hidden">
+<div class="card"><h2>Reports & Exports</h2>
+<div class="formgrid"><div><label>Start date</label><input id="reportFrom" type="date"></div><div><label>End date</label><input id="reportTo" type="date"></div></div>
+<button class="primary" onclick="reports()">Generate Report</button>
+<button class="secondary" onclick="csvExport()">Export CSV</button>
+<button class="secondary" onclick="window.print()">Print</button>
+<div id="reportOutput"></div></div>
+</section>
+
+<section id="subscription" class="page hidden">
+<div class="card"><h2>Subscription Plans</h2>
+<div class="grid">
+<div class="stat"><small>Free trial</small><strong>24 hours</strong></div>
+<div class="stat"><small>Business plan</small><strong>MK 5,000</strong><p>90 days</p></div>
+</div>
+<h3>Manual payment request</h3>
+<p>TNM Mpamba: <strong>+265890840266</strong><br>Account name: <strong>Tivwale Ng'oma</strong></p>
+<div class="notice">Confirm payment details with the owner before paying. This demo cannot verify payments automatically or enforce expiry securely.</div>
+<form id="paymentForm">
+<label>Transaction reference</label><input name="reference" required>
+<label>Payment date</label><input name="date" type="date" required>
+<label>Plan</label><select name="plan"><option>MK 5,000 / 90 days</option></select>
+<button class="primary">Submit Request</button>
+</form>
+<div id="paymentTable" class="tablewrap"></div></div>
+</section>
+
+<section id="admin" class="page hidden">
+<div class="card"><h2>Owner Dashboard (Demo)</h2>
+<div class="notice">This page only shows data saved in this browser. It is not a secure global admin dashboard and cannot see all users or verify payment evidence.</div>
+<div class="grid">
+<div class="stat"><small>Recorded sales</small><strong id="adminSales">0</strong></div>
+<div class="stat"><small>Recorded customers</small><strong id="adminCustomers">0</strong></div>
+<div class="stat"><small>Workers</small><strong id="adminWorkers">0</strong></div>
+<div class="stat"><small>Payment requests</small><strong id="adminPayments">0</strong></div>
+</div>
+<h3>Subscription requests</h3><div id="adminPaymentTable" class="tablewrap"></div>
+</div>
+</section>
+
+<section id="settings" class="page hidden">
+<div class="card"><h2>Backup & Settings</h2>
+<p>Download a backup of this browser's demo data.</p>
+<button class="primary" onclick="backup()">Download JSON Backup</button>
+<h3>Restore backup</h3><input type="file" id="backupFile" accept=".json,application/json">
+<button class="secondary" onclick="restoreBackup()">Restore Backup</button>
+<h3>Business details</h3><p id="profileText"></p>
+<h3>Data and privacy</h3>
+<div class="notice">Records are stored in local browser storage. They are not automatically shared with other devices. Do not use this demo for confidential business records.</div>
+<button class="danger" onclick="resetApp()">Delete all local demo data</button>
+</div>
+</section>
+</main>
+</div>
+<footer>SmartManage Businesses · Malawi · Demo version</footer>
+
+<script>
+const STORE="smartmanage_all_mw_demo";
+let data={profile:null,sales:[],expenses:[],stock:[],customers:[],suppliers:[],workers:[],payroll:[],school:[],refunds:[],payments:[],activity:[]};
+function loadData(){try{const x=JSON.parse(localStorage.getItem(STORE));if(x)data={...data,...x}}catch(e){}}
+function saveData(){localStorage.setItem(STORE,JSON.stringify(data));renderAll()}
+function cash(n){return "MK "+Number(n||0).toLocaleString("en-US",{maximumFractionDigits:2})}
+function safe(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function log(s){data.activity.unshift({date:new Date().toLocaleString(),text:s});data.activity=data.activity.slice(0,40)}
+function dateDefault(){return new Date().toISOString().slice(0,10)}
+function startApp(){
+const name=document.getElementById("setupName").value.trim();
+const phone=document.getElementById("setupPhone").value.trim();
+const pin=document.getElementById("setupPin").value;
+if(!name||!phone||!/^\d{4,8}$/.test(pin)){alert("Enter business name, phone number and a 4–8 digit demo PIN.");return}
+data.profile={name,type:document.getElementById("setupType").value,phone:document.getElementById("setupCode").value+phone};
+log("Demo business profile created");saveData();
+document.getElementById("setup").classList.add("hidden");document.getElementById("application").classList.remove("hidden")
+}
+function page(id,btn){document.querySelectorAll(".page").forEach(x=>x.classList.add("hidden"));document.getElementById(id).classList.remove("hidden");document.querySelectorAll("nav button").forEach(x=>x.classList.remove("active"));if(btn)btn.classList.add("active");renderAll()}
+function readForm(f){return Object.fromEntries(new FormData(f).entries())}
+function attach(id,fn){document.getElementById(id).addEventListener("submit",e=>{e.preventDefault();fn(readForm(e.target));e.target.reset();document.querySelectorAll(".dateField").forEach(x=>x.value=dateDefault());saveData()})}
+function showTable(id,heads,rows){const el=document.getElementById(id);if(!el)return;el.innerHTML=rows.length?'<table><thead><tr>'+heads.map(x=>'<th>'+safe(x)+'</th>').join("")+'</tr></thead><tbody>'+rows.map(r=>'<tr>'+r.map(x=>'<td>'+x+'</td>').join("")+'</tr>').join("")+'</tbody></table>':'<p>No records yet.</p>'}
+function del(type,i){return '<button class="danger" onclick="deleteRow(\''+type+'\','+i+')">Delete</button>'}
+function deleteRow(type,i){if(!confirm("Delete this record?"))return;data[type].splice(i,1);log("Deleted "+type+" record");saveData()}
+function dateRow(x){return safe(x.date||"")}
+attach("salesForm",x=>{x.amount=+x.amount;x.qty=+x.qty;x.date=x.date||dateDefault();data.sales.unshift(x);if(x.method==="Credit / Unpaid"&&x.customer){let c=data.customers.find(y=>y.name.toLowerCase()===x.customer.toLowerCase());if(c)c.debt=(+c.debt||0)+x.amount;else data.customers.push({name:x.customer,phone:"",debt:x.amount,paid:0})}log("Sale recorded: "+x.item)});
+attach("expensesForm",x=>{x.amount=+x.amount;x.date=x.date||dateDefault();data.expenses.unshift(x);log("Expense recorded: "+x.description)});
+attach("stockForm",x=>{x.qty=+x.qty;x.buy=+x.buy;x.sell=+x.sell;const old=data.stock.find(y=>y.name.toLowerCase()===x.name.toLowerCase());if(old){old.qty+=x.qty;old.buy=x.buy;old.sell=x.sell;old.supplier=x.supplier}else data.stock.push(x);log("Stock updated: "+x.name)});
+attach("customersForm",x=>{x.debt=Math.max(0,+x.debt-(+x.paid||0));x.paid=+x.paid;const old=data.customers.find(y=>y.name.toLowerCase()===x.name.toLowerCase());if(old){old.debt=Math.max(0,(+old.debt||0)+x.debt);old.paid=(+old.paid||0)+x.paid;if(x.phone)old.phone=x.phone}else data.customers.push(x);log("Customer/debt record updated: "+x.name)});
+attach("suppliersForm",x=>{x.balance=+x.balance;data.suppliers.push(x);log("Supplier added: "+x.name)});
+attach("workersForm",x=>{x.pay=+x.pay;data.workers.push(x);log("Worker added: "+x.name)});
+attach("payrollForm",x=>{x.amount=+x.amount;x.date=x.date||dateDefault();data.payroll.unshift(x);if(x.status==="Paid")data.expenses.unshift({description:"Payroll: "+x.worker+" / "+x.period,category:"Wages",amount:x.amount,method:x.method,date:x.date});log("Payroll recorded: "+x.worker)});
+attach("schoolForm",x=>{x.fees=+x.fees;x.paid=+x.paid;x.marks=+x.marks;data.school.push(x);log("Student record saved: "+x.name)});
+attach("refundsForm",x=>{x.amount=+x.amount;x.date=x.date||dateDefault();data.refunds.unshift(x);log("Refund recorded")});
+attach("paymentForm",x=>{x.status="Pending review";data.payments.unshift(x);log("Subscription request recorded")});
+function renderAll(){
+if(!data.profile)return;
+document.getElementById("welcome").textContent=data.profile.name+" Dashboard";
+document.getElementById("businessBadge").textContent=data.profile.type;
+document.getElementById("dateNow").textContent=new Date().toLocaleDateString();
+const sales=data.sales.reduce((a,x)=>a+(+x.amount||0),0);
+const expenses=data.expenses.reduce((a,x)=>a+(+x.amount||0),0);
+const refunds=data.refunds.reduce((a,x)=>a+(+x.amount||0),0);
+document.getElementById("dashSales").textContent=cash(sales);
+document.getElementById("dashExpenses").textContent=cash(expenses+refunds);
+document.getElementById("dashProfit").textContent=cash(sales-expenses-refunds);
+document.getElementById("dashStock").textContent=data.stock.reduce((a,x)=>a+(+x.qty||0),0);
+document.getElementById("dashDebt").textContent=cash(data.customers.reduce((a,x)=>a+(+x.debt||0),0));
+document.getElementById("dashWorkers").textContent=data.workers.length;
+document.getElementById("dashStudents").textContent=data.school.length;
+document.getElementById("dashPayroll").textContent=cash(data.payroll.filter(x=>x.status==="Pending").reduce((a,x)=>a+(+x.amount||0),0));
+document.getElementById("activityList").innerHTML=data.activity.length?data.activity.slice(0,12).map(x=>"<p>"+safe(x.date)+" — "+safe(x.text)+"</p>").join(""):"No activity yet.";
+showTable("salesTable",["Date","Item","Qty","Amount","Method","Reference",""],data.sales.map((x,i)=>[dateRow(x),safe(x.item),x.qty,cash(x.amount),safe(x.method),safe(x.reference),del("sales",i)]));
+showTable("expensesTable",["Date","Description","Category","Amount","Method",""],data.expenses.map((x,i)=>[dateRow(x),safe(x.description),safe(x.category),cash(x.amount),safe(x.method),del("expenses",i)]));
+showTable("stockTable",["Product","Qty","Buying price","Selling price","Supplier",""],data.stock.map((x,i)=>[safe(x.name),x.qty,cash(x.buy),cash(x.sell),safe(x.supplier),del("stock",i)]));
+showTable("customersTable",["Customer","Phone","Debt",""],data.customers.map((x,i)=>[safe(x.name),safe(x.phone),cash(x.debt),del("customers",i)]));
+showTable("suppliersTable",["Supplier","Phone","Products","Balance",""],data.suppliers.map((x,i)=>[safe(x.name),safe(x.phone),safe(x.products),cash(x.balance),del("suppliers",i)]));
+showTable("workersTable",["Name","Phone","Role","Pay","Frequency","Method","Account",""],data.workers.map((x,i)=>[safe(x.name),safe(x.phone),safe(x.role),cash(x.pay),safe(x.frequency),safe(x.method),safe(x.account),del("workers",i)]));
+document.getElementById("workerSelect").innerHTML='<option value="">Select worker</option>'+data.workers.map(x=>'<option>'+safe(x.name)+'</option>').join("");
+showTable("payrollTable",["Worker","Amount","Method","Reference","Period","Status","Date",""],data.payroll.map((x,i)=>[safe(x.worker),cash(x.amount),safe(x.method),safe(x.reference),safe(x.period),safe(x.status),dateRow(x),del("payroll",i)]));
+showTable("schoolTable",["Student","Class","Guardian","Phone","Fees","Paid","Attendance","Marks",""],data.school.map((x,i)=>[safe(x.name),safe(x.className),safe(x.guardian),safe(x.phone),cash(x.fees),cash(x.paid),safe(x.attendance),x.marks+"%",del("school",i)]));
+showTable("refundsTable",["Date","Reference","Reason","Amount","Method",""],data.refunds.map((x,i)=>[dateRow(x),safe(x.reference),safe(x.reason),cash(x.amount),safe(x.method),del("refunds",i)]));
+document.getElementById("invoiceSale").innerHTML=data.sales.map((x,i)=>'<option value="'+i+'">'+safe(x.date)+" — "+safe(x.item)+" — "+cash(x.amount)+'</option>').join("");
+showTable("paymentTable",["Reference","Date","Plan","Status"],data.payments.map(x=>[safe(x.reference),safe(x.date),safe(x.plan),safe(x.status)]));
+showTable("adminPaymentTable",["Reference","Date","Plan","Status"],data.payments.map(x=>[safe(x.reference),safe(x.date),safe(x.plan),safe(x.status)]));
+document.getElementById("adminSales").textContent=data.sales.length;
+document.getElementById("adminCustomers").textContent=data.customers.length;
+document.getElementById("adminWorkers").textContent=data.workers.length;
+document.getElementById("adminPayments").textContent=data.payments.length;
+document.getElementById("profileText").textContent="Business: "+data.profile.name+" | Type: "+data.profile.type+" | Phone: "+data.profile.phone;
+reports()
+}
+function reports(){
+let from=document.getElementById("reportFrom").value,to=document.getElementById("reportTo").value;
+const filter=a=>a.filter(x=>(!from||((x.date||"")>=from))&&(!to||((x.date||"")<=to)));
+const s=filter(data.sales),e=filter(data.expenses),r=filter(data.refunds);
+const st=s.reduce((a,x)=>a+(+x.amount||0),0),ex=e.reduce((a,x)=>a+(+x.amount||0),0),rf=r.reduce((a,x)=>a+(+x.amount||0),0);
+document.getElementById("reportOutput").innerHTML="<hr><p>Sales: <b>"+cash(st)+"</b></p><p>Expenses: <b>"+cash(ex)+"</b></p><p>Refunds: <b>"+cash(rf)+"</b></p><p>Estimated balance: <b>"+cash(st-ex-rf)+"</b></p><p>Sales records: "+s.length+" | Expenses: "+e.length+" | Refunds: "+r.length+"</p>"
+}
+function csvExport(){
+const rows=[["Type","Date","Description","Amount","Method","Reference"]];
+data.sales.forEach(x=>rows.push(["Sale",x.date,x.item,x.amount,x.method,x.reference]));
+data.expenses.forEach(x=>rows.push(["Expense",x.date,x.description,x.amount,x.method,""]));
+data.refunds.forEach(x=>rows.push(["Refund",x.date,x.reason,x.amount,x.method,x.reference]));
+const csv=rows.map(r=>r.map(v=>'"'+String(v??"").replace(/"/g,'""')+'"').join(",")).join("\r\n");
+download("smartmanage-report.csv",csv,"text/csv")
+}
+function backup(){download("smartmanage-backup.json",JSON.stringify(data,null,2),"application/json")}
+function download(name,content,type){const a=document.createElement("a");const u=URL.createObjectURL(new Blob([content],{type}));a.href=u;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(u),1000)}
+function restoreBackup(){
+const f=document.getElementById("backupFile").files[0];if(!f){alert("Choose a backup file first.");return}
+const r=new FileReader();r.onload=()=>{try{const x=JSON.parse(r.result);if(!x.profile)throw Error();if(confirm("Replace current data with this backup?")){data={...data,...x};saveData();alert("Backup restored")}}catch(e){alert("Invalid backup file")}};r.readAsText(f)
+}
+function printInvoice(){
+const i=document.getElementById("invoiceSale").value;if(i===""){alert("Record a sale first.");return}
+const x=data.sales[+i],w=window.open("","_blank");if(!w){alert("Allow pop-ups to print this receipt.");return}
+w.document.write("<html><head><title>SmartManage Receipt</title></head><body style='font-family:Arial;padding:25px'><h2>SMARTMANAGE BUSINESSES</h2><h3>Sales Receipt</h3><p>Business: "+safe(data.profile.name)+"</p><p>Date: "+safe(x.date)+"</p><hr><p>Item: "+safe(x.item)+"</p><p>Quantity: "+safe(x.qty)+"</p><p>Payment: "+safe(x.method)+"</p><p>Reference: "+safe(x.reference)+"</p><h2>Total: "+cash(x.amount)+"</h2><p>Thank you for your business.</p><script>window.onload=function(){window.print()}<\/script></body></html>");w.document.close()
+}
+function resetApp(){if(confirm("Delete all SmartManage demo data from this browser?")){localStorage.removeItem(STORE);location.reload()}}
+loadData();
+document.querySelectorAll(".dateField").forEach(x=>x.value=dateDefault());
+if(data.profile){document.getElementById("setup").classList.add("hidden");document.getElementById("application").classList.remove("hidden");renderAll()}
+</script>
+</body>
+</html>
